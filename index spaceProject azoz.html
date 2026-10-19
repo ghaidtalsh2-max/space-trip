@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl"><head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>رحلة الفضاء والجاذبية</title>
+<style>
+:root{--text:#eaf2ff;--muted:rgba(234,242,255,.75);--a:#7c4dff;--b:#00e5ff}
+*{box-sizing:border-box}
+body{margin:0;font-family:"Tajawal","Cairo","Segoe UI",Tahoma,sans-serif;color:var(--text);background:#000;min-height:100vh;overflow:hidden}
+#cv{position:fixed;inset:0;z-index:1}
+#svgo{position:fixed;inset:0;z-index:150;pointer-events:none;width:100vw;height:100vh}
+.laser{stroke:#00e5ff;stroke-width:2;stroke-dasharray:6,6;animation:dm 1.5s linear infinite;filter:drop-shadow(0 0 6px #00e5ff)}
+@keyframes dm{from{stroke-dashoffset:24}to{stroke-dashoffset:0}}
+header{position:fixed;top:12px;right:12px;left:12px;z-index:10;display:flex;align-items:center;gap:12px;padding:10px 16px;background:rgba(10,15,30,.75);backdrop-filter:blur(15px);border:1px solid rgba(255,255,255,.12);border-radius:16px;pointer-events:none}
+header h1{margin:0;font-size:18px;background:linear-gradient(45deg,#00d2ff,#3a7bd5);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+header p{margin:2px 0 0;font-size:12px;color:var(--muted)}
+.logo{height:40px;border-radius:8px}
+
+/* شاشة الصاروخ */
+#launch{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;background:radial-gradient(ellipse at 50% 100%,#1a1050 0,#070a1c 55%,#02030a 100%);transition:opacity .8s,visibility .8s;overflow:hidden}
+#launch.hidden{opacity:0;visibility:hidden;pointer-events:none}
+.tw{position:absolute;inset:0;background-image:radial-gradient(2px 2px at 20% 30%,#fff,transparent),radial-gradient(1.5px 1.5px at 70% 20%,#fff,transparent),radial-gradient(2px 2px at 85% 60%,#cde,transparent),radial-gradient(1.5px 1.5px at 10% 80%,#fff,transparent),radial-gradient(1.5px 1.5px at 45% 70%,#fff,transparent),radial-gradient(2px 2px at 60% 90%,#cde,transparent);animation:tw 3s ease-in-out infinite alternate}
+@keyframes tw{from{opacity:.4}to{opacity:1}}
+.word{position:absolute;top:7%;text-align:center;font-weight:900;font-size:clamp(26px,6vw,44px);background:linear-gradient(90deg,#00e5ff,#c4b5fd,#ff7aa2);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.word small{display:block;font-size:.4em;font-weight:500;-webkit-text-fill-color:var(--muted);margin-top:6px}
+#rocket{position:relative;width:min(340px,86vw);aspect-ratio:320/390;margin-top:8vh;animation:hover 3s ease-in-out infinite;transition:transform 1.8s cubic-bezier(.5,0,.9,.4)}
+@keyframes hover{0%,100%{translate:0 0}50%{translate:0 -10px}}
+#rocket.go{transform:translateY(-150vh);animation:shake .08s linear infinite}
+@keyframes shake{0%{translate:-2px 0}50%{translate:2px 0}100%{translate:-2px 0}}
+#rocket svg{width:100%;height:100%;overflow:visible;display:block}
+.flame{transform-origin:160px 368px;animation:fl .15s ease-in-out infinite alternate}
+#rocket.go .flame{transform:scaleY(2.2);animation:none}
+@keyframes fl{from{transform:scaleY(.85) scaleX(.95)}to{transform:scaleY(1.2) scaleX(1.05)}}
+.bf{transform-box:fill-box;transform-origin:50% 0;animation:fl .12s ease-in-out infinite alternate}
+@keyframes fl2{from{transform:scaleX(.85) scaleY(.95)}to{transform:scaleX(1.2) scaleY(1.05)}}
+.credit{position:absolute;bottom:2.5%;left:50%;transform:translateX(-50%);z-index:5;text-align:center;padding:8px 20px;border-radius:14px;background:rgba(10,15,40,.65);border:1px solid rgba(255,255,255,.18);backdrop-filter:blur(6px);font-size:13px;line-height:1.9;color:#eaf2ff;white-space:nowrap}
+.credit b{color:#ffd978}
+.glogo{direction:ltr;font-family:'Product Sans','Poppins','Segoe UI',Arial,sans-serif;font-weight:700;font-size:28px;letter-spacing:1px;line-height:1.2}
+.form{position:absolute;left:23.4%;right:23.4%;top:33.8%;display:flex;flex-direction:column;gap:5px;padding:8px;border-radius:14px;background:linear-gradient(180deg,#0f1f55,#070d2c);border:2px solid #4b5fa8;box-shadow:inset 0 0 14px #000,0 0 18px rgba(0,229,255,.25)}
+.form h2{margin:0;font-size:14px;text-align:center;color:#fff}
+.form input{width:100%;padding:7px;border-radius:10px;border:1px solid rgba(255,255,255,.25);background:rgba(0,0,10,.5);color:#fff;text-align:center;font:inherit;font-size:14px;outline:none}
+.form input:focus{border-color:#00e5ff;box-shadow:0 0 12px rgba(0,229,255,.5)}
+.go-btn{border:0;cursor:pointer;padding:10px;border-radius:10px;font:inherit;font-weight:800;font-size:15px;color:#fff;background:linear-gradient(135deg,#ff9a3c,#ff2e63);box-shadow:0 6px 16px rgba(255,46,99,.5);transition:.15s}
+.go-btn:hover{transform:translateY(-2px);filter:brightness(1.1)}
+
+/* شاشة الآيات */
+#verses{position:fixed;inset:0;z-index:120;display:flex;align-items:center;justify-content:center;background:rgba(2,4,14,.9);backdrop-filter:blur(8px);opacity:0;visibility:hidden;transition:opacity 1s}
+#verses.show{opacity:1;visibility:visible}
+.vbox{width:min(700px,94vw);text-align:center;padding:30px 22px}
+.hello{color:#00e5ff;font-size:16px;margin-bottom:18px}
+.verse{font-family:"Amiri","Scheherazade New","Traditional Arabic",serif;font-size:clamp(28px,6.5vw,46px);line-height:2.1;color:#fff;min-height:7.5em;display:flex;align-items:center;justify-content:center;transition:opacity .8s;text-shadow:0 0 18px rgba(124,77,255,.8)}
+.src{color:#c4b5fd;font-size:15px;margin:8px 0 18px}
+.dots{display:flex;gap:8px;justify-content:center;margin-bottom:20px}
+.dots i{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.25);transition:.3s}
+.dots i.on{background:#00e5ff;box-shadow:0 0 8px #00e5ff;width:22px;border-radius:6px}
+.enter{max-width:300px;width:100%}
+
+/* بطاقات */
+.planet-label{position:absolute;z-index:20;color:#fff;background:rgba(10,15,30,.85);padding:5px 10px;border-radius:8px;border:1px solid rgba(0,229,255,.3);font-size:.75rem;pointer-events:none;text-align:center;opacity:0;transition:opacity .5s;white-space:nowrap;top:0;left:0}
+.planet-label.visible{opacity:1}.planet-label strong{color:#00e5ff;display:block}
+.sunv{position:absolute;z-index:20;top:0;left:0;width:340px;text-align:center;pointer-events:none;opacity:0;transition:opacity .5s;font-family:"Amiri","Scheherazade New","Traditional Arabic",serif;font-size:28px;line-height:1.8;color:#ffd978;text-shadow:0 0 16px rgba(255,170,0,.95)}
+.sunv.visible{opacity:1}
+.sunv small{display:block;color:#fff;font-size:15px;opacity:.85;font-family:"Tajawal","Segoe UI",sans-serif}
+.mo{position:fixed;inset:0;background:rgba(0,0,0,.75);backdrop-filter:blur(8px);z-index:200;display:flex;align-items:center;justify-content:center;opacity:0;visibility:hidden;transition:.3s}
+.mo.active{opacity:1;visibility:visible}
+.mc{background:linear-gradient(135deg,rgba(15,31,61,.96),rgba(8,17,35,.96));border:1px solid rgba(0,229,255,.4);box-shadow:0 0 40px rgba(0,229,255,.25);border-radius:20px;padding:24px;width:min(520px,92vw);max-height:88vh;overflow:auto;text-align:right}
+.mc.sunmode{border-color:rgba(255,170,0,.6);box-shadow:0 0 45px rgba(255,150,0,.35)}
+.mc.sunmode h3{color:#ffc247}
+.mc h3{margin:0 0 10px;color:#00e5ff;font-size:1.4rem}
+.wh{background:rgba(0,229,255,.1);border:1px dashed rgba(0,229,255,.4);padding:10px;border-radius:10px;text-align:center;font-weight:bold;margin:10px 0}
+.wh span{color:#00e5ff}
+.is{margin-top:10px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);padding:10px 12px;border-radius:12px}
+.is h4{margin:0 0 6px;color:#a78bfa;font-size:.95rem}.is p{margin:0;color:var(--muted);line-height:1.7;font-size:13.5px}
+.is ul{margin:0;padding:0 18px 0 0;color:var(--muted);line-height:1.8;font-size:13.5px}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.st{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:8px 10px}
+.st b{display:block;color:#7be9ff;font-size:11.5px;font-weight:600;margin-bottom:2px}
+.st span{font-size:13px;color:#fff;line-height:1.5}
+.st.wide{grid-column:1/-1}
+#pvc{width:100%;height:220px;display:block;border-radius:14px;background:radial-gradient(circle at 50% 50%,rgba(124,77,255,.18),transparent 70%);touch-action:none;cursor:grab}
+.pvh{text-align:center;font-size:11.5px;color:var(--muted);margin:2px 0 8px}
+.cl{margin-top:16px;width:100%;border:0;color:#fff;padding:10px;border-radius:10px;cursor:pointer;font:inherit;font-weight:bold;background:linear-gradient(135deg,var(--b),var(--a))}
+.hud{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);z-index:50;background:rgba(10,15,30,.85);backdrop-filter:blur(10px);padding:8px 16px;border-radius:999px;border:1px solid rgba(255,255,255,.12);display:flex;gap:10px;align-items:center;opacity:0;visibility:hidden;transition:.4s;font-size:13px;white-space:nowrap}
+.hud.visible{opacity:1;visibility:visible}
+.hb{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;padding:6px 12px;border-radius:999px;cursor:pointer;font:inherit;font-size:12px}
+.fly-btn{margin-top:10px;width:100%;border:0;color:#fff;padding:10px;border-radius:10px;cursor:pointer;font:inherit;font-weight:bold;background:linear-gradient(135deg,#ff9a3c,#ff2e63)}
+#fx{position:fixed;inset:0;z-index:40;pointer-events:none;opacity:0;background:radial-gradient(circle at 50% 50%,transparent 35%,rgba(0,229,255,.18) 100%);transition:opacity .5s}
+#fx.on{opacity:1}
+#kv{position:fixed;top:92px;left:50%;transform:translateX(-50%);z-index:45;width:min(640px,92vw);text-align:center;pointer-events:none;opacity:0;transition:opacity .8s;font-family:"Amiri","Scheherazade New","Traditional Arabic",serif;font-size:clamp(20px,4.6vw,30px);line-height:1.9;color:#ffe9a8;text-shadow:0 0 16px rgba(255,190,60,.9),0 2px 8px #000}
+#kv.on{opacity:1}
+#kv small{display:block;font-size:.5em;color:#fff;opacity:.85;font-family:"Tajawal","Segoe UI",sans-serif}
+#sv{position:fixed;top:92px;left:50%;transform:translateX(-50%);z-index:46;width:min(520px,92vw);text-align:center;pointer-events:none;opacity:0;transition:opacity .6s;padding:12px 16px;border-radius:14px;background:rgba(10,15,30,.78);backdrop-filter:blur(8px);border:1px solid rgba(0,229,255,.4);box-shadow:0 0 24px rgba(0,229,255,.25);font-size:14px;line-height:1.8}
+#sv.on{opacity:1}
+#sv b{display:block;color:#00e5ff;font-size:16px}
+#sv em{display:block;color:#ffd978;font-style:normal;margin-top:2px}
+#sv small{display:block;color:var(--muted);font-size:11.5px;margin-top:4px}
+.credit .cr{display:flex;align-items:center;justify-content:center;gap:8px}
+.credit .sep{opacity:.4}
+@media(max-width:640px){.credit{font-size:12px;padding:6px 14px}}
+.form .go-btn{padding:8px}
+.gen{display:flex;gap:6px}
+.gb{flex:1;padding:6px 4px;border-radius:10px;border:1px solid rgba(255,255,255,.25);background:rgba(0,0,10,.5);color:#fff;font:inherit;font-size:13px;cursor:pointer;transition:.15s}
+.gb.on{background:linear-gradient(135deg,#00e5ff,#7c4dff);border-color:#00e5ff;box-shadow:0 0 10px rgba(0,229,255,.5)}
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+</head><body>
+<div id="cv"></div>
+<svg id="svgo"><line id="laser" class="laser" style="display:none"/></svg>
+
+<header><img class="logo" src="/logo.png" onerror="this.style.display='none'"/>
+<div><h1>لوحة الكواكب التفاعلية</h1><p id="sub">انقر على أي كوكب لتعرف وزنك عليه</p></div></header>
+
+<!-- الصاروخ -->
+<div id="launch">
+  <div class="tw"></div>
+  <div class="word">وزنك في الفضاء<small>أدخل بياناتك داخل الصاروخ وانطلق</small></div>
+  <div class="credit">
+    <div>🎓 <b>عبدالعزيز</b></div>
+    <div>نادي <b>جوجل</b></div>
+  </div>
+  <div id="rocket">
+    <svg viewBox="0 0 320 390">
+      <defs>
+        <linearGradient id="bodyG" x1="0" x2="1"><stop offset="0" stop-color="#b4cbe8"/><stop offset=".35" stop-color="#ffffff"/><stop offset="1" stop-color="#97b1d4"/></linearGradient>
+        <linearGradient id="orG" x1="0" x2="1"><stop offset="0" stop-color="#e2581a"/><stop offset=".45" stop-color="#ffa63d"/><stop offset="1" stop-color="#d44d18"/></linearGradient>
+        <linearGradient id="blG" x1="0" x2="1"><stop offset="0" stop-color="#2468b5"/><stop offset=".45" stop-color="#6cc4ff"/><stop offset="1" stop-color="#1f5aa3"/></linearGradient>
+        <linearGradient id="flG" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#fff3b0"/><stop offset=".35" stop-color="#ffb12a"/><stop offset=".75" stop-color="#ff5a1a"/><stop offset="1" stop-color="#ff2e00" stop-opacity="0"/></linearGradient>
+        <radialGradient id="glass" cx=".35" cy=".3" r=".9"><stop offset="0" stop-color="#c8f4ff"/><stop offset="1" stop-color="#2a7fd0"/></radialGradient>
+        <clipPath id="pc"><circle cx="120" cy="154" r="21"/></clipPath>
+        <clipPath id="bc"><path d="M55 340 L55 150 Q55 60 160 14 Q265 60 265 150 L265 340 Q160 356 55 340Z"/></clipPath>
+      </defs>
+
+      <!-- اللهب -->
+      <g class="flame">
+        <path d="M118 366 Q94 430 128 420 Q134 474 160 508 Q186 474 192 420 Q226 430 202 366 Z" fill="url(#flG)"/>
+        <path d="M132 366 Q122 410 146 416 Q156 450 160 470 Q164 450 174 416 Q198 410 188 366 Z" fill="#ffd54a" opacity=".95"/>
+        <path d="M146 366 Q144 400 160 426 Q176 400 174 366 Z" fill="#fff" opacity=".92"/>
+      </g>
+      <path class="bf" d="M24 342 Q32 396 40 342 Z" fill="url(#flG)"/>
+      <path class="bf" d="M280 342 Q288 396 296 342 Z" fill="url(#flG)"/>
+
+      <g stroke="#2b2140" stroke-width="3" stroke-linejoin="round">
+        <!-- الزعانف -->
+        <path d="M55 296 Q4 350 2 408 L55 376 Z" fill="url(#blG)"/>
+        <path d="M265 296 Q316 350 318 408 L265 376 Z" fill="url(#blG)"/>
+        <path d="M2 408 L18 388 L30 400 L12 414 Z" fill="url(#orG)"/>
+        <path d="M318 408 L302 388 L290 400 L308 414 Z" fill="url(#orG)"/>
+        <!-- الدافعات الجانبية -->
+        <rect x="46" y="255" width="12" height="22" fill="url(#blG)"/>
+        <rect x="262" y="255" width="12" height="22" fill="url(#blG)"/>
+        <path d="M15 232 Q32 196 49 232 Z" fill="url(#orG)"/>
+        <rect x="15" y="232" width="34" height="98" fill="url(#orG)"/>
+        <rect x="15" y="262" width="34" height="14" fill="url(#blG)"/>
+        <path d="M21 330 L43 330 L39 342 L25 342 Z" fill="#3b4254"/>
+        <path d="M271 232 Q288 196 305 232 Z" fill="url(#orG)"/>
+        <rect x="271" y="232" width="34" height="98" fill="url(#orG)"/>
+        <rect x="271" y="262" width="34" height="14" fill="url(#blG)"/>
+        <path d="M277 330 L299 330 L295 342 L281 342 Z" fill="#3b4254"/>
+        <!-- فوهة المحرك -->
+        <path d="M125 346 L113 372 Q160 388 207 372 L195 346 Z" fill="#3b4254"/>
+      </g>
+      <circle cx="32" cy="248" r="4.5" fill="#6cc4ff" stroke="#2b2140" stroke-width="2"/>
+      <circle cx="288" cy="248" r="4.5" fill="#6cc4ff" stroke="#2b2140" stroke-width="2"/>
+
+      <!-- الجسم المتين -->
+      <path d="M55 340 L55 150 Q55 60 160 14 Q265 60 265 150 L265 340 Q160 356 55 340Z" fill="url(#bodyG)"/>
+      <path d="M76 310 Q70 230 76 160" stroke="#fff" stroke-width="6" fill="none" opacity=".55" stroke-linecap="round"/>
+      <g clip-path="url(#bc)">
+        <rect x="40" y="0" width="240" height="112" fill="url(#orG)"/>
+        <rect x="40" y="112" width="240" height="12" fill="#ffc247"/>
+        <rect x="40" y="316" width="240" height="34" fill="url(#orG)"/>
+      </g>
+      <path d="M40 112 H280 M40 124 H280" stroke="#2b2140" stroke-width="2.5" clip-path="url(#bc)"/>
+      <path d="M55 340 L55 150 Q55 60 160 14 Q265 60 265 150 L265 340 Q160 356 55 340Z" fill="none" stroke="#2b2140" stroke-width="3.5" stroke-linejoin="round"/>
+      <g fill="#7a3b00"><circle cx="75" cy="118" r="1.8"/><circle cx="105" cy="118" r="1.8"/><circle cx="135" cy="118" r="1.8"/><circle cx="165" cy="118" r="1.8"/><circle cx="195" cy="118" r="1.8"/><circle cx="225" cy="118" r="1.8"/><circle cx="250" cy="118" r="1.8"/></g>
+      <text x="160" y="338" font-size="13" font-weight="800" fill="#fff3b0" stroke="#7a3b00" stroke-width=".5" paint-order="stroke" text-anchor="middle" letter-spacing="2" font-family="Segoe UI,Arial,sans-serif">STAR EXPRESS</text>
+      <path d="M120 40 Q160 12 200 40 Q160 50 120 40 Z" fill="url(#blG)" stroke="#2b2140" stroke-width="2"/>
+      <path d="M160 16 L160 -8" stroke="#ff9a3c" stroke-width="5" stroke-linecap="round"/>
+      <circle cx="160" cy="-13" r="15" fill="#ffe066" opacity=".3"/>
+      <circle cx="160" cy="-13" r="7.5" fill="#ffe066" stroke="#e8a317" stroke-width="2"/>
+      <text x="88" y="92" font-size="16" fill="#ffd54a" stroke="#7a3b00" stroke-width=".5">★</text>
+      <text x="216" y="92" font-size="16" fill="#ffd54a" stroke="#7a3b00" stroke-width=".5">★</text>
+
+      <!-- النافذة + رائد الفضاء الصغير -->
+      <g transform="translate(160 78) scale(.95) translate(-120 -154)">
+        <circle cx="120" cy="154" r="29" fill="url(#orG)" stroke="#2b2140" stroke-width="3"/>
+        <circle cx="120" cy="154" r="21" fill="url(#glass)"/>
+        <g clip-path="url(#pc)">
+          <path d="M98 178 Q120 160 142 178 L142 192 L98 192 Z" fill="#f1f5fb" stroke="#9fb0cc" stroke-width="1.5"/>
+          <rect x="112" y="173" width="16" height="8" rx="2" fill="#6cc4ff" stroke="#3b6aa5" stroke-width="1"/>
+          <path d="M132 178 Q140 170 139 161" stroke="#f1f5fb" stroke-width="7" fill="none" stroke-linecap="round"/>
+          <circle cx="139" cy="157" r="3.6" fill="#fff" stroke="#9fb0cc" stroke-width="1"/>
+          <circle cx="120" cy="152" r="15" fill="#ffffff" stroke="#9fb0cc" stroke-width="1.5"/>
+          <circle cx="120" cy="153" r="11" fill="#ffd2a8"/>
+          <path d="M109 150 Q120 138 131 150 Q120 145 109 150 Z" fill="#5b3a1e"/>
+          <circle cx="116" cy="153" r="1.5" fill="#222"/><circle cx="124" cy="153" r="1.5" fill="#222"/>
+          <path d="M115 158 Q120 163 125 158" stroke="#222" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+          <circle cx="107" cy="154" r="3" fill="#6cc4ff" stroke="#3b6aa5" stroke-width="1"/>
+        </g>
+        <circle cx="120" cy="154" r="21" fill="none" stroke="#2b2140" stroke-width="2.5"/>
+        <path d="M104 140 Q110 133 119 132" stroke="#fff" stroke-width="3" fill="none" opacity=".6" stroke-linecap="round"/>
+        <circle cx="120" cy="154" r="25.5" fill="none" stroke="#7a3b00" stroke-width="2.2" stroke-dasharray="1 8.2" stroke-linecap="round"/>
+      </g>
+    </svg>
+    <div class="form">
+      <h2>جاهز للإقلاع؟ 🚀</h2>
+      <input id="nameIn" placeholder="اسمك" autocomplete="off"/>
+      <input id="wIn" type="number" placeholder="وزنك (كجم)" min="1" step="0.1"/>
+      <div class="gen"><button type="button" class="gb" id="gM" onclick="setG('m')">👨 ذكر</button><button type="button" class="gb" id="gF" onclick="setG('f')">👩 أنثى</button></div>
+      <button class="go-btn" onclick="launch()">إقلاع 🚀</button>
+    </div>
+  </div>
+</div>
+
+<!-- الآيات -->
+<div id="verses"><div class="vbox">
+  <div class="hello" id="hello"></div>
+  <div class="verse" id="vt"></div>
+  <div class="src" id="vs"></div>
+  <div class="dots" id="dots"></div>
+  <button class="go-btn enter" onclick="enterSpace()">ادخل المجرة 🌌</button>
+</div></div>
+
+<div id="fx"></div>
+<div id="kv"></div>
+<div id="sv"></div>
+<div id="labels"></div>
+<div class="sunv" id="sunv">﴿ وَجَعَلْنَا سِرَاجًا وَهَّاجًا ﴾<small>سورة النبأ – 13 &nbsp;•&nbsp; انقر على الشمس ☀️</small></div>
+<div class="planet-label" id="bhl">الثقب الأسود<strong>وزنك: ∞</strong></div>
+
+<div class="mo" id="pm"><div class="mc" id="pcard">
+  <canvas id="pvc"></canvas><div class="pvh">👆 اسحب لتدوير الكوكب بيدك</div><h3 id="pt"></h3><div class="wh">وزنك عليه: <span id="pw"></span> كجم</div>
+  <div class="is"><h4>📐 الحسبة</h4><p id="pmath"></p></div>
+  <div class="is" id="pstatBox" style="display:none"><h4>📊 بطاقة البيانات</h4><div class="stats" id="pstat"></div></div>
+  <div class="is"><h4 id="ph4">✨ نبذة علمية</h4><p id="pinfo"></p></div>
+  <div class="is" id="pbenBox" style="display:none"><h4 id="pbenT">🔭 حقائق مدهشة</h4><ul id="pben"></ul></div>
+  <button class="fly-btn" id="flyBtn" onclick="flyTo()">🚀 سافر إلى الكوكب</button>
+  <button class="cl" onclick="closeP()">إغلاق 🌠</button></div></div>
+
+<div class="hud" id="hud"><span id="hw"></span>
+  <button class="hb" onclick="resetJ()">🔄 تغيير الوزن</button></div>
+
+<script>
+const VERSES=[
+["وَهُوَ الَّذِي خَلَقَ اللَّيْلَ وَالنَّهَارَ وَالشَّمْسَ وَالْقَمَرَ ۖ كُلٌّ فِي فَلَكٍ يَسْبَحُونَ","سورة الأنبياء – 33"],
+["وَالسَّمَاءَ بَنَيْنَاهَا بِأَيْدٍ وَإِنَّا لَمُوسِعُونَ","سورة الذاريات – 47"],
+["لَا الشَّمْسُ يَنبَغِي لَهَا أَن تُدْرِكَ الْقَمَرَ وَلَا اللَّيْلُ سَابِقُ النَّهَارِ ۚ وَكُلٌّ فِي فَلَكٍ يَسْبَحُونَ","سورة يس – 40"],
+["وَلَقَدْ زَيَّنَّا السَّمَاءَ الدُّنْيَا بِمَصَابِيحَ","سورة الملك – 5"],
+["إِنَّ فِي خَلْقِ السَّمَاوَاتِ وَالْأَرْضِ وَاخْتِلَافِ اللَّيْلِ وَالنَّهَارِ لَآيَاتٍ لِّأُولِي الْأَلْبَابِ","سورة آل عمران – 190"]
+];
+
+// آيات الملك لله (تظهر أثناء الرحلة)
+const KV=[
+["وَلِلَّهِ مُلْكُ السَّمَاوَاتِ وَالْأَرْضِ ۗ وَاللَّهُ عَلَىٰ كُلِّ شَيْءٍ قَدِيرٌ","سورة آل عمران – 189"],
+["لِلَّهِ مُلْكُ السَّمَاوَاتِ وَالْأَرْضِ وَمَا فِيهِنَّ ۚ وَهُوَ عَلَىٰ كُلِّ شَيْءٍ قَدِيرٌ","سورة المائدة – 120"],
+["لَهُ مُلْكُ السَّمَاوَاتِ وَالْأَرْضِ ۖ يُحْيِي وَيُمِيتُ ۖ وَهُوَ عَلَىٰ كُلِّ شَيْءٍ قَدِيرٌ","سورة الحديد – 2"],
+["تَبَارَكَ الَّذِي بِيَدِهِ الْمُلْكُ وَهُوَ عَلَىٰ كُلِّ شَيْءٍ قَدِيرٌ","سورة الملك – 1"]
+];
+
+// وصف المشهد عند الهبوط على السطح
+const SURF={
+ Mercury:"رمادي مليء بالحفر، والشمس تبدو أكبر بنحو مرتين ونصف من شمسنا.",
+ Venus:"سطح بركاني تحت غلاف خانق، وحرارة 465°C وسماء برتقالية كثيفة.",
+ Earth:"قارات ومحيطات وغيوم تتحرك تحتك، وهنا الحياة.",
+ Mars:"رمال وصخور حمراء، وسماء تميل للوردي بسبب الغبار.",
+ Jupiter:"أحزمة سحب وعواصف عملاقة، ولا يوجد سطح صلب أبداً.",
+ Saturn:"قمم سحب ذهبية هادئة، وانظر فوقك: الحلقات تمتد في السماء.",
+ Uranus:"ضباب أزرق مخضر من الميثان، وهو كوكب بلا سطح صلب.",
+ Neptune:"سحب زرقاء عميقة ورياح أسرع من الصوت، وبرد قارس.",
+ Sun:"أنت فوق السطح المرئي للشمس (الفوتوسفير). مشهد خيالي، فلا شيء يقاوم هذه الحرارة."
+};
+const GAS={Jupiter:1,Saturn:1,Uranus:1,Neptune:1};
+
+// بطاقة البيانات
+const S=o=>[["📏 القطر",o.d],["⚖️ الكتلة",o.mass],["☀️ البعد عن الشمس",o.dist],["🕒 طول اليوم",o.day],["📆 طول السنة",o.yr],["🌡️ درجة الحرارة",o.t],["⬇️ جاذبية السطح",o.g],["🚀 سرعة الإفلات",o.esc],["🧭 ميلان المحور",o.tilt],["🌙 الأقمار",o.m],["🌫️ الغلاف الجوي",o.atm,1],["🧱 التركيب الداخلي",o.int,1],["🛰️ أبرز المهام",o.ms,1]];
+
+// الاسم، المفتاح، لون، الحجم، المدار، سرعة المدار، الجاذبية، النبذة، الميلان، الدوران، البيانات، الحقائق
+const PD=[
+["عطارد","Mercury",0xaaaaaa,.6,11,.015,.38,"أصغر كواكب المجموعة الشمسية وأقربها للشمس. سطحه مليء بالحفر الناتجة عن اصطدام النيازك عبر مليارات السنين، وفرق الحرارة بين ليله ونهاره هائل لأنه بلا غلاف جوي يحتفظ بالحرارة.",.03,.002,
+ S({d:"4,879 كم",mass:"0.055 من كتلة الأرض",dist:"57.9 مليون كم",day:"59 يوماً أرضياً",yr:"88 يوماً أرضياً",t:"من -180°C ليلاً إلى 430°C نهاراً",g:"3.7 م/ث²",esc:"4.3 كم/ث",tilt:"0.03° تقريباً بلا فصول",m:"لا يوجد",atm:"غلاف خارجي رقيق جداً من الهيدروجين والهيليوم والصوديوم، لا يكاد يحتفظ بحرارة",int:"نواة حديدية ضخمة تشكل حوالي 85% من نصف قطره، يحيط بها وشاح وقشرة صخرية",ms:"ماريينر 10 (1974)، ميسنجر (دار حوله بين 2011 و2015)، وبيبي كولومبو في طريقها إليه"}),
+ ["اليوم الشمسي عليه (من شروق لشروق) يعادل 176 يوماً أرضياً، أي أطول من سنته!","توجد رواسب جليدية في حفر قطبية لا تصلها الشمس أبداً رغم قربه منها.","يتقلص ببطء مع تبرّد نواته، فتظهر على سطحه جروف طويلة تشبه التجاعيد.","أسرع الكواكب دوراناً حول الشمس بحوالي 47 كم/ث."]],
+["الزهرة","Venus",0xe3bb76,.9,17,.012,.91,"توأم الأرض في الحجم، لكنه جحيم حقيقي: غلاف جوي كثيف يحبس الحرارة فيجعله أشد كواكب المجموعة حرارة، حتى أسخن من عطارد الأقرب للشمس.",.05,-.0015,
+ S({d:"12,104 كم",mass:"0.815 من كتلة الأرض",dist:"108.2 مليون كم",day:"243 يوماً أرضياً (بعكس الاتجاه)",yr:"225 يوماً أرضياً",t:"حوالي 465°C ثابتة ليلاً ونهاراً",g:"8.9 م/ث²",esc:"10.4 كم/ث",tilt:"177° (مقلوب تقريباً)",m:"لا يوجد",atm:"ثاني أكسيد الكربون ≈ 96%، وسحب من حمض الكبريتيك، وضغطه أكبر من الأرض بنحو 90 مرة",int:"وشاح صخري ونواة حديدية بحجم قريب من نواة الأرض",ms:"فينيرا 7 أول هبوط ناجح على كوكب آخر (1970)، وماجلان رسم خريطة سطحه بالرادار في التسعينات"}),
+ ["يدور بعكس معظم الكواكب، فالشمس تشرق فيه من الغرب.","يومه (243 يوماً أرضياً) أطول من سنته (225 يوماً).","ثالث أسطع جرم في سمائنا بعد الشمس والقمر، ويُسمّى نجمة الصباح أو المساء.","سطحه أسخن من نقطة انصهار الرصاص (327°C).","أطول مركبة بقيت تعمل على سطحه نحو ساعتين فقط قبل أن تتعطل من الحرارة والضغط."]],
+["الأرض","Earth",0x2266ff,1,23,.009,1,"كوكبنا، الوحيد المعروف بوجود الحياة والماء السائل على سطحه. غلافه الجوي ومجاله المغناطيسي يحميانا من الإشعاع الشمسي والنيازك الصغيرة، وبُعده المناسب عن الشمس يجعل مناخه معتدلاً.",.41,.02,
+ S({d:"12,756 كم",mass:"5.97 × 10²⁴ كجم",dist:"149.6 مليون كم",day:"24 ساعة",yr:"365.25 يوماً",t:"متوسطها حوالي 15°C",g:"9.8 م/ث²",esc:"11.2 كم/ث",tilt:"23.4° وهو سبب الفصول",m:"1 (القمر)",atm:"نيتروجين ≈ 78% وأكسجين ≈ 21% وقليل من الأرغون وبخار الماء",int:"قشرة رقيقة فوق وشاح صخري، ثم نواة خارجية سائلة ونواة داخلية صلبة، وحركة النواة السائلة تصنع المجال المغناطيسي",ms:"سبوتنيك 1 أول قمر صناعي (1957)، والمحطة الفضائية الدولية تدور حوله منذ عقود"}),
+ ["حوالي 71% من سطحه مغطى بالماء.","أكثر كواكب المجموعة الشمسية كثافة.","القمر يسبب المد والجزر ويثبّت ميلان محور الأرض فيحافظ على استقرار فصولها.","ليست كروية تماماً، فهي منتفخة قليلاً عند خط الاستواء.","مجالها المغناطيسي يصدّ الرياح الشمسية ويصنع الشفق القطبي."]],
+["المريخ","Mars",0xff4422,.7,29,.007,.38,"الكوكب الأحمر، سطحه صحراء باردة جافة وعليه آثار أنهار وبحيرات قديمة، وهو الهدف الأول للبعثات البشرية المستقبلية.",.44,.019,
+ S({d:"6,779 كم",mass:"0.107 من كتلة الأرض",dist:"227.9 مليون كم",day:"24 ساعة و37 دقيقة",yr:"687 يوماً أرضياً",t:"متوسطها حوالي -63°C",g:"3.7 م/ث²",esc:"5.0 كم/ث",tilt:"25.2° وله فصول مثل الأرض",m:"2 (فوبوس وديموس)",atm:"ثاني أكسيد الكربون ≈ 95%، وضغطه أقل من 1% من ضغط الأرض",int:"نواة غنية بالحديد والكبريت، ووشاح صخري، وقشرة سميكة",ms:"فايكنغ (1976)، كيوريوسيتي (2012)، برسيفيرانس مع مروحية إنجينيويتي (2021)، ومسبار الأمل الإماراتي الذي يدور حوله منذ 2021"}),
+ ["يضم أعلى بركان في المجموعة الشمسية: أوليمبوس مونس، وارتفاعه نحو ضعفين ونصف ارتفاع إيفرست.","وادي مارينير يمتد أكثر من 4,000 كم، أي أكبر بكثير من جراند كانيون.","لونه الأحمر سببه الصدأ، أي أكسيد الحديد في تربته.","غروب الشمس عليه يبدو أزرق.","جاذبيته تتيح لك القفز أعلى بنحو مرتين ونصف مما تقفز على الأرض."]],
+["المشتري","Jupiter",0xd4a373,2.1,38,.004,2.53,"عملاق غازي هو الأكبر بين الكواكب، كتلته أكبر من كتلة باقي الكواكب مجتمعة، وليس له سطح صلب تقف عليه. أحزمة سحبه الملونة وعواصفه الدائمة ظاهرة حتى بالتلسكوبات الصغيرة.",.05,.04,
+ S({d:"139,820 كم",mass:"317.8 ضعف كتلة الأرض",dist:"778.5 مليون كم",day:"حوالي 9.9 ساعة",yr:"حوالي 11.9 سنة أرضية",t:"حوالي -110°C عند قمم السحب",g:"24.8 م/ث² عند قمم السحب",esc:"59.5 كم/ث",tilt:"3.1°",m:"أكثر من 90 قمراً، أكبرها غانيميد",atm:"هيدروجين ≈ 90% وهيليوم ≈ 10% تقريباً، مع سحب من الأمونيا",int:"غالباً نواة صخرية صغيرة محاطة بطبقات من الهيدروجين الفلزي السائل تحت ضغط هائل",ms:"فوياجر 1 و2 (1979)، غاليليو (دار حوله 1995 إلى 2003)، وجونو التي وصلت مداره عام 2016"}),
+ ["البقعة الحمراء الكبرى عاصفة تدور منذ قرون، وهي أكبر من الأرض.","يتّسع لأكثر من 1,300 كرة أرضية.","أسرع الكواكب دوراناً، ولذلك ينتفخ قليلاً عند خط الاستواء.","اكتشف غاليليو أقماره الأربعة الكبرى عام 1610.","غانيميد أكبر قمر في المجموعة الشمسية وأكبر من عطارد، ويُعتقد أن تحت جليد يوروبا محيطاً من الماء السائل."]],
+["زحل","Saturn",0xf4e285,1.7,47,.003,1.07,"سيد الحلقات، عملاق غازي كثافته أقل من الماء، وحلقاته مكوّنة من ملايين القطع من الجليد والصخور تدور حوله بانتظام.",.47,.035,
+ S({d:"116,460 كم",mass:"95.2 ضعف كتلة الأرض",dist:"1.43 مليار كم",day:"حوالي 10.7 ساعة",yr:"حوالي 29.5 سنة أرضية",t:"حوالي -140°C",g:"10.4 م/ث²",esc:"35.5 كم/ث",tilt:"26.7° ولذلك نرى حلقاته مائلة",m:"أكثر من 200 قمر والعدد في ازدياد، أشهرها تيتان",atm:"هيدروجين ≈ 96% وهيليوم ≈ 3%",int:"نواة صخرية ثقيلة تحت طبقات من الهيدروجين الفلزي السائل ثم الغازي",ms:"فوياجر 1 و2 (1980-1981)، وكاسيني–هيغنز (2004–2017) التي أنزلت المسبار هيغنز على تيتان عام 2005"}),
+ ["لو وُجد حوض ماء ضخم بما يكفي لوضعه فيه لطفا فوق الماء.","تمتد حلقاته مئات آلاف الكيلومترات، لكن سمكها قليل جداً، في أغلبها عشرات الأمتار فقط.","قمره تيتان له غلاف جوي كثيف وبحيرات من الميثان السائل.","عند قطبه الشمالي عاصفة سداسية الشكل ثابتة.","رياحه عند خط الاستواء تتجاوز 1,800 كم/ساعة."]],
+["أورانوس","Uranus",0x72efdd,1.2,55,.002,.89,"عملاق جليدي أزرق مخضر بسبب غاز الميثان في غلافه، ويدور مائلاً على جانبه تقريباً، فيبدو كأنه يتدحرج حول الشمس.",1.7,-.025,
+ S({d:"50,724 كم",mass:"14.5 ضعف كتلة الأرض",dist:"2.87 مليار كم",day:"حوالي 17 ساعة (بعكس الاتجاه)",yr:"حوالي 84 سنة أرضية",t:"حوالي -195°C، وسجّل غلافه نحو -224°C",g:"8.7 م/ث²",esc:"21.3 كم/ث",tilt:"97.8° أي على جنبه",m:"نحو 28 قمراً، أسماؤها من شخصيات شكسبير وبوب",atm:"هيدروجين ≈ 83% وهيليوم ≈ 15% وميثان ≈ 2%",int:"وشاح من جليد الماء والأمونيا والميثان حول نواة صخرية صغيرة",ms:"فوياجر 2 (1986) هي المركبة الوحيدة التي زارته حتى الآن"}),
+ ["كل قطب فيه يعيش حوالي 42 سنة من الضوء ثم 42 سنة من الظلام.","أول كوكب اكتُشف بالتلسكوب، وذلك على يد ويليام هيرشل عام 1781.","غلافه أبرد غلاف جوي مسجل بين كواكب المجموعة الشمسية.","له 13 حلقة معروفة، لكنها داكنة وضعيفة."]],
+["نبتون","Neptune",0x4ea8de,1.2,63,.0015,1.14,"أبعد الكواكب عن الشمس، عملاق جليدي أزرق عميق، تعصف فيه أسرع رياح في المجموعة الشمسية رغم بُعده وبرودته.",.49,.03,
+ S({d:"49,244 كم",mass:"17.1 ضعف كتلة الأرض",dist:"4.5 مليار كم",day:"حوالي 16 ساعة",yr:"حوالي 165 سنة أرضية",t:"حوالي -200°C",g:"11.2 م/ث²",esc:"23.5 كم/ث",tilt:"28.3°",m:"نحو 16 قمراً، أكبرها تريتون",atm:"هيدروجين وهيليوم وميثان، والميثان يعطيه لونه الأزرق",int:"وشاح من الماء والأمونيا والميثان حول نواة صخرية صغيرة، وله مصدر حرارة داخلي",ms:"فوياجر 2 (1989) هي المركبة الوحيدة التي زارته"}),
+ ["رياحه تتجاوز 2,000 كم/ساعة، أي أسرع من الصوت.","اكتُشف عام 1846 بالحساب الرياضي قبل أن يُرى بالتلسكوب.","أكبر أقماره تريتون يدور عكس اتجاه دوران الكوكب، ويُعتقد أنه جرم أُسر من حزام كايبر.","أتم أول دورة كاملة حول الشمس منذ اكتشافه عام 2011."]]
+];
+
+const SUN_G=27.9;
+const SUN_STATS=[["📏 القطر","1.39 مليون كم، حوالي 109 أضعاف الأرض"],["⚖️ الكتلة","حوالي 333,000 ضعف كتلة الأرض"],["🌍 البعد عن الأرض","149.6 مليون كم، وضوؤها يصلنا في 8 دقائق و20 ثانية"],["🕒 الدوران حول نفسه","حوالي 25 يوماً عند خط الاستواء"],["🌡️ الحرارة","السطح ≈ 5,500°C واللبّ ≈ 15 مليون°C"],["⬇️ جاذبية السطح","274 م/ث² أي حوالي 28 ضعف الأرض"],["🚀 سرعة الإفلات","حوالي 617 كم/ث"],["⏳ العمر","حوالي 4.6 مليار سنة"],["🧪 التركيب","هيدروجين ≈ 73% وهيليوم ≈ 25% تقريباً",1],["🧱 الطبقات","اللبّ حيث الاندماج النووي، ثم منطقة الإشعاع، ثم منطقة الحمل، ثم السطح المرئي (الفوتوسفير)، ثم الإكليل",1],["🛰️ أبرز المهام","سوهو، وسولار أوربيتر، وباركر سولار بروب التي دخلت الإكليل الشمسي عام 2021",1]];
+const SUN_BEN=[
+"الضوء والدفء: بدونها تتجمد الأرض ويعمّ الظلام.",
+"البناء الضوئي: تستخدمه النباتات لصنع غذائها وإنتاج الأكسجين الذي نتنفسه.",
+"فيتامين D: يصنعه جلدك بتعرضه لأشعتها باعتدال، وهو مهم لقوة العظام.",
+"دورة الماء: حرارتها تبخّر البحار فتتكوّن السحب والأمطار.",
+"الطاقة الشمسية: تُحوَّل إلى كهرباء نظيفة عبر الألواح الشمسية.",
+"الفصول والرياح والمناخ: كلها تتحرك بفعل طاقتها.",
+"تنظيم الساعة الحيوية: ضوء النهار يضبط نومنا ومزاجنا."
+];
+
+/* ===== مولّد أنسجة الكواكب (بدون صور خارجية) ===== */
+const TW=400,TH=200; // قلّلهما (مثلاً 300 و150) إذا كان جوالك بطيئاً، وكبّرهما لسطح أوضح عند الهبوط
+function hh(x,y,z){const n=Math.sin(x*127.1+y*311.7+z*74.7)*43758.5453;return n-Math.floor(n)}
+function vn(x,y,z){const xi=Math.floor(x),yi=Math.floor(y),zi=Math.floor(z),xf=x-xi,yf=y-yi,zf=z-zi,
+ s=t=>t*t*(3-2*t),u=s(xf),v=s(yf),w=s(zf),L=(a,b,t)=>a+(b-a)*t;
+ return L(L(L(hh(xi,yi,zi),hh(xi+1,yi,zi),u),L(hh(xi,yi+1,zi),hh(xi+1,yi+1,zi),u),v),
+          L(L(hh(xi,yi,zi+1),hh(xi+1,yi,zi+1),u),L(hh(xi,yi+1,zi+1),hh(xi+1,yi+1,zi+1),u),v),w)}
+function fbm(x,y,z,o=5){let a=.5,s=0,f=1;for(let i=0;i<o;i++){s+=a*vn(x*f,y*f,z*f);f*=2;a*=.5}return s}
+const mixc=(a,b,t)=>{t=Math.max(0,Math.min(1,t));return [a[0]+(b[0]-a[0])*t,a[1]+(b[1]-a[1])*t,a[2]+(b[2]-a[2])*t]};
+function mk(fn){
+ const c=document.createElement('canvas');c.width=TW;c.height=TH;
+ const x=c.getContext('2d'),im=x.createImageData(TW,TH);
+ for(let j=0;j<TH;j++){const lat=((j+.5)/TH-.5)*Math.PI;
+  for(let i=0;i<TW;i++){const lon=i/TW*2*Math.PI,
+   px=Math.cos(lat)*Math.cos(lon),py=-Math.sin(lat),pz=Math.cos(lat)*Math.sin(lon),
+   r=fn(px,py,pz),k=(j*TW+i)*4;
+   im.data[k]=r[0];im.data[k+1]=r[1];im.data[k+2]=r[2];im.data[k+3]=r[3]===undefined?255:r[3]}}
+ x.putImageData(im,0,0);return new THREE.CanvasTexture(c)}
+const TEX={
+ Mercury:(x,y,z)=>{const n=fbm(x*3,y*3,z*3,5),c=Math.abs(vn(x*14,y*14,z*14)-.5)*2;let t=.35+n*.55-c*.25;t=Math.max(0,Math.min(1,t));const g=70+t*120;return [g*1.02,g*.97,g*.92]},
+ Venus:(x,y,z)=>{const w=fbm(x*2,y*4,z*2,4),n=fbm(x*3+w*2,y*6+w*2,z*3,5);return mixc([190,140,70],[245,215,150],n*1.3)},
+ Earth:(x,y,z)=>{const e=fbm(x*2.2+3,y*2.2,z*2.2,6);
+  if(Math.abs(y)>.88+(vn(x*8,y*8,z*8)-.5)*.1)return [240,246,255];
+  if(e>.53){const m=fbm(x*5,y*5,z*5,4);let c=mixc([40,110,45],[150,130,70],m*1.4+(Math.abs(y)<.25?.3:0));if(e>.64)c=mixc(c,[110,95,80],(e-.64)*6);return c}
+  return mixc([30,110,190],[5,25,90],(.53-e)*5)},
+ EarthC:(x,y,z)=>{const c=fbm(x*3,y*5,z*3,6);return [255,255,255,Math.max(0,Math.min(1,(c-.5)*4))*220]},
+ Mars:(x,y,z)=>{const n=fbm(x*3,y*3,z*3,6),d=fbm(x*6+5,y*6,z*6,4);let c=mixc([150,60,30],[215,130,80],n*1.3);c=mixc(c,[70,30,20],(d-.55)*3);if(Math.abs(y)>.9)c=[240,240,245];return c},
+ Jupiter:(x,y,z)=>{const t=fbm(x*3,y*14,z*3,4),b=Math.sin(y*16+t*4)*.5+.5,f=fbm(x*2,y*10,z*2,5);
+  let c=mixc([140,95,60],[235,215,185],b*.8+f*.3);
+  const lon=Math.atan2(z,x),dx=Math.atan2(Math.sin(lon-2),Math.cos(lon-2)),dy=y+.3,s=dx*dx/.05+dy*dy/.012;
+  if(s<1)c=mixc(c,[185,70,45],1-s);return c},
+ Saturn:(x,y,z)=>{const t=fbm(x*2,y*10,z*2,4),b=Math.sin(y*22+t*3)*.5+.5;return mixc([190,165,105],[240,225,170],b*.7+t*.3)},
+ Uranus:(x,y,z)=>mixc([150,215,220],[185,235,235],Math.sin(y*10)*.25+.5+fbm(x*2,y*4,z*2,3)*.3),
+ Neptune:(x,y,z)=>{const t=fbm(x*3,y*9,z*3,5),b=Math.sin(y*14+t*3)*.5+.5;let c=mixc([25,60,170],[70,130,230],b*.6+t*.3);
+  const lon=Math.atan2(z,x),dx=Math.atan2(Math.sin(lon-1),Math.cos(lon-1)),dy=y+.25,s=dx*dx/.06+dy*dy/.02;
+  if(s<1)c=mixc(c,[10,25,90],1-s);return c},
+ Sun:(x,y,z)=>{const n=fbm(x*6,y*6,z*6,5),g=vn(x*22,y*22,z*22);let c=mixc([255,120,10],[255,225,90],n*1.2);
+  const sp=fbm(x*3+9,y*3,z*3,4);if(sp>.62)c=mixc(c,[120,35,0],(sp-.62)*8);return mixc(c,[255,240,170],g*.25)},
+ Moon:(x,y,z)=>{const n=fbm(x*4,y*4,z*4,5),c=Math.abs(vn(x*12,y*12,z*12)-.5)*2,g=120+n*90-c*30;return [g,g,g*.97]}
+};
+function ringTex(){
+ const c=document.createElement('canvas');c.width=512;c.height=4;const x=c.getContext('2d');
+ for(let i=0;i<512;i++){const t=i/512;let a=0;
+  if(t>.08&&t<.38)a=.35+.25*Math.sin(t*90);else if(t>.42&&t<.52)a=.05;else if(t>.52&&t<.95)a=.7+.2*Math.sin(t*140);
+  a*=.6+.4*vn(t*60,0,0);a=Math.max(0,Math.min(1,a));
+  x.fillStyle=`rgba(${(215-t*40)|0},${(195-t*40)|0},${(150-t*30)|0},${a})`;x.fillRect(i,0,1,4)}
+ return new THREE.CanvasTexture(c)}
+function makeRing(inner,outer){
+ const g=new THREE.RingGeometry(inner,outer,128),pos=g.attributes.position,uv=g.attributes.uv,v=new THREE.Vector3();
+ for(let i=0;i<pos.count;i++){v.fromBufferAttribute(pos,i);uv.setXY(i,(v.length()-inner)/(outer-inner),.5)}
+ return new THREE.Mesh(g,new THREE.MeshBasicMaterial({map:ringTex(),side:THREE.DoubleSide,transparent:true,depthWrite:false}))}
+function glowTex(){
+ const c=document.createElement('canvas');c.width=c.height=256;const x=c.getContext('2d'),g=x.createRadialGradient(128,128,10,128,128,128);
+ g.addColorStop(0,'rgba(255,220,120,1)');g.addColorStop(.25,'rgba(255,160,40,.55)');g.addColorStop(1,'rgba(255,100,0,0)');
+ x.fillStyle=g;x.fillRect(0,0,256,256);return new THREE.CanvasTexture(c)}
+function atmo(r,color,op){
+ return new THREE.Mesh(new THREE.SphereGeometry(r*1.07,40,40),new THREE.MeshBasicMaterial({color,transparent:true,opacity:op,side:THREE.BackSide,blending:THREE.AdditiveBlending,depthWrite:false}))}
+
+let scene,camera,renderer,stars,sun,bh,bhCore,bhArc,bhDisk,pick=[],planets=[],ray=new THREE.Raycaster(),mouse=new THREE.Vector2(),active=null,base=70,started=false,uname="",vi=0,vtimer;
+const $=id=>document.getElementById(id);
+
+let sunTex,pv={},pvDrag=false,gender="";
+function init(){
+ scene=new THREE.Scene();
+ camera=new THREE.PerspectiveCamera(55,innerWidth/innerHeight,.1,1000);camera.position.set(0,42,68);camera.lookAt(0,0,0);
+ renderer=new THREE.WebGLRenderer({antialias:true,alpha:true});renderer.setSize(innerWidth,innerHeight);renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+ $('cv').appendChild(renderer.domElement);
+ scene.add(new THREE.AmbientLight(0x2a2f45));scene.add(new THREE.PointLight(0xffffff,2.6,400));
+ const g=new THREE.BufferGeometry(),p=new Float32Array(12000);for(let i=0;i<p.length;i++)p[i]=(Math.random()-.5)*600;
+ g.setAttribute('position',new THREE.BufferAttribute(p,3));
+ stars=new THREE.Points(g,new THREE.PointsMaterial({color:0xffffff,size:.9,transparent:true,opacity:.8}));scene.add(stars);
+
+ // الشمس بنسيج وهالة متوهجة
+ sun=new THREE.Mesh(new THREE.SphereGeometry(4.5,48,48),new THREE.MeshBasicMaterial({map:(sunTex=mk(TEX.Sun))}));
+ sun.userData.ref='sun';pick.push(sun);scene.add(sun);
+ const gt=glowTex();
+ [[26,1],[48,.4]].forEach(s=>{const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:gt,blending:THREE.AdditiveBlending,depthWrite:false,transparent:true,opacity:s[1]}));sp.scale.set(s[0],s[0],1);scene.add(sp)});
+
+ // الثقب الأسود
+ bh=new THREE.Group();bh.position.set(-26,10,-38);
+ bhCore=new THREE.Mesh(new THREE.SphereGeometry(2.2,32,32),new THREE.MeshBasicMaterial({color:0x000000}));
+ const glow=new THREE.Mesh(new THREE.SphereGeometry(2.6,32,32),new THREE.MeshBasicMaterial({color:0x7c4dff,transparent:true,opacity:.35,side:THREE.BackSide}));
+ bhDisk=new THREE.Mesh(new THREE.RingGeometry(3,7,64),new THREE.MeshBasicMaterial({color:0xff8a1f,side:THREE.DoubleSide,transparent:true,opacity:.45}));
+ bhArc=new THREE.Mesh(new THREE.RingGeometry(3.2,6.5,64,1,0,Math.PI*1.2),new THREE.MeshBasicMaterial({color:0xfff1b0,side:THREE.DoubleSide,transparent:true,opacity:.85}));
+ bhDisk.rotation.x=bhArc.rotation.x=Math.PI/2.4;
+ bhCore.userData.ref=bhDisk.userData.ref='bh';pick.push(bhCore,bhDisk);
+ bh.add(glow,bhCore,bhDisk,bhArc);scene.add(bh);
+
+ // الكواكب الواقعية
+ const rocky={Mercury:1,Mars:1};
+ const atm={Venus:[0xffd9a0,.28],Earth:[0x5aa8ff,.4],Mars:[0xff9a6a,.14],Neptune:[0x4a7dff,.3],Uranus:[0x99ffff,.22],Jupiter:[0xe8c9a0,.1],Saturn:[0xf2e2a8,.1]};
+ PD.forEach(d=>{
+  const [name,key,col,size,rad,spd,gr,info,tilt,spin,stats,facts]=d;
+  const o=new THREE.Mesh(new THREE.RingGeometry(rad-.05,rad+.05,128),new THREE.MeshBasicMaterial({color:0xffffff,side:THREE.DoubleSide,transparent:true,opacity:.12}));
+  o.rotation.x=Math.PI/2;scene.add(o);
+  const T=mk(TEX[key]);
+  const grp=new THREE.Group();grp.rotation.z=tilt;
+  const mat=new THREE.MeshStandardMaterial({map:T,roughness:key==='Earth'?.55:.95,metalness:0});
+  if(rocky[key]){mat.bumpMap=T;mat.bumpScale=.5}
+  const sphere=new THREE.Mesh(new THREE.SphereGeometry(size,64,64),mat);
+  grp.add(sphere);
+  const P={mesh:grp,sphere,name,key,r:rad,s:spd,g:gr,info,spin,stats,facts,tex:T,tilt,atmc:atm[key],a:Math.random()*6.28};
+  sphere.userData.ref=P;pick.push(sphere);
+  if(atm[key])grp.add(atmo(size,atm[key][0],atm[key][1]));
+  if(key==='Earth'){
+   P.clouds=new THREE.Mesh(new THREE.SphereGeometry(size*1.02,48,48),new THREE.MeshStandardMaterial({map:(P.cTex=mk(TEX.EarthC)),transparent:true,depthWrite:false,roughness:1}));
+   grp.add(P.clouds);
+   P.moon=new THREE.Group();
+   const mm=new THREE.Mesh(new THREE.SphereGeometry(.27,24,24),new THREE.MeshStandardMaterial({map:mk(TEX.Moon),roughness:1}));
+   mm.position.x=2.2;P.moon.add(mm);grp.add(P.moon);
+  }
+  if(key==='Saturn'){
+   const rg=makeRing(size*1.3,size*2.4);rg.rotation.x=Math.PI/2;rg.userData.ref=P;pick.push(rg);grp.add(rg);
+  }
+  scene.add(grp);
+  const l=document.createElement('div');l.className='planet-label';$('labels').appendChild(l);P.label=l;
+  planets.push(P);
+ });
+ addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight)});
+ addEventListener('click',onClick);
+ initPV();
+ animate();
+}
+function initPV(){
+ const cv=$('pvc');
+ pv.r=new THREE.WebGLRenderer({canvas:cv,antialias:true,alpha:true});
+ pv.r.setPixelRatio(Math.min(devicePixelRatio,2));
+ pv.s=new THREE.Scene();
+ pv.c=new THREE.PerspectiveCamera(40,2,.1,100);
+ pv.s.add(new THREE.AmbientLight(0x555566));
+ const L=new THREE.DirectionalLight(0xffffff,1.7);L.position.set(-4,2,5);pv.s.add(L);
+ pv.g=new THREE.Group();pv.s.add(pv.g);
+ cv.addEventListener('pointerdown',e=>{pvDrag=true;pv.lx=e.clientX;try{cv.setPointerCapture(e.pointerId)}catch(_){}});
+ cv.addEventListener('pointermove',e=>{if(pvDrag&&pv.spin){pv.spin.rotation.y+=(e.clientX-pv.lx)*.012;pv.lx=e.clientX}});
+ addEventListener('pointerup',()=>{pvDrag=false});
+ $('pm').addEventListener('click',e=>{if(e.target===$('pm'))closeP()});
+}
+function setPV(P){
+ while(pv.g.children.length)pv.g.remove(pv.g.children[0]);
+ pv.spin=pv.clouds=null;pv.bh=false;pv.g.rotation.set(0,0,0);
+ const R=2;let z=7.4,cy=.6;
+ if(P==='sun'){
+  pv.spin=new THREE.Mesh(new THREE.SphereGeometry(R,64,64),new THREE.MeshBasicMaterial({map:sunTex}));
+  const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:glowTex(),blending:THREE.AdditiveBlending,depthWrite:false,transparent:true}));sp.scale.set(8,8,1);
+  pv.g.add(pv.spin,sp);
+ }else if(P==='bh'){
+  pv.bh=true;
+  pv.spin=new THREE.Mesh(new THREE.RingGeometry(2.6,5,64),new THREE.MeshBasicMaterial({color:0xff8a1f,side:THREE.DoubleSide,transparent:true,opacity:.8}));
+  pv.spin.rotation.x=Math.PI/2.3;
+  pv.g.add(new THREE.Mesh(new THREE.SphereGeometry(1.8,48,48),new THREE.MeshBasicMaterial({color:0x000000})),pv.spin);
+  z=11;cy=1.5;
+ }else{
+  const mat=new THREE.MeshStandardMaterial({map:P.tex,roughness:P.key==='Earth'?.55:.95});
+  if(P.key==='Mercury'||P.key==='Mars'){mat.bumpMap=P.tex;mat.bumpScale=.5}
+  pv.spin=new THREE.Mesh(new THREE.SphereGeometry(R,64,64),mat);pv.g.add(pv.spin);
+  if(P.atmc)pv.g.add(atmo(R,P.atmc[0],P.atmc[1]));
+  if(P.cTex){pv.clouds=new THREE.Mesh(new THREE.SphereGeometry(R*1.02,48,48),new THREE.MeshStandardMaterial({map:P.cTex,transparent:true,depthWrite:false,roughness:1}));pv.g.add(pv.clouds)}
+  if(P.key==='Saturn'){const rg=makeRing(R*1.3,R*2.4);rg.rotation.x=Math.PI/2;pv.g.add(rg);z=12;cy=2.2}
+  pv.g.rotation.z=P.tilt;
+ }
+ pv.c.position.set(0,cy,z);pv.c.lookAt(0,0,0);
+ const w=$('pvc').clientWidth||400,h=220;
+ pv.r.setSize(w,h,false);pv.c.aspect=w/h;pv.c.updateProjectionMatrix();
+}
+function renderPV(){
+ if(!$('pm').classList.contains('active')||!pv.spin)return;
+ if(!pvDrag){if(pv.bh)pv.spin.rotation.z+=.012;else pv.spin.rotation.y+=.008}
+ if(pv.clouds)pv.clouds.rotation.y+=.011;
+ pv.r.render(pv.s,pv.c);
+}
+function place(el,pos,tx,ty){
+ const v=pos.clone().project(camera);
+ el.style.transform=`translate(${(v.x*.5+.5)*innerWidth}px,${(v.y*-.5+.5)*innerHeight}px) translate(${tx},${ty})`;
+}
+function animate(){
+ requestAnimationFrame(animate);
+ stars.rotation.y+=.00015;sun.rotation.y+=.002;
+ bhArc.rotation.z+=.03;bhDisk.rotation.z-=.01;
+ planets.forEach(p=>{
+  p.a+=p.s;p.mesh.position.set(Math.cos(p.a)*p.r,0,Math.sin(p.a)*p.r);
+  p.sphere.rotation.y+=p.spin;
+  if(p.clouds)p.clouds.rotation.y+=p.spin*1.35;
+  if(p.moon)p.moon.rotation.y+=.025;
+  if(started)place(p.label,p.mesh.position,'-50%','-140%');
+ });
+ if(started){
+  place($('sunv'),new THREE.Vector3(0,6,0),'-50%','-100%');
+  place($('bhl'),new THREE.Vector3(bh.position.x,bh.position.y+7,bh.position.z),'-50%','-100%');
+ }
+ flyStep();laser();renderer.render(scene,camera);renderPV();
+}
+function laser(){
+ const L=$('laser');
+ if(!$('pm').classList.contains('active')||!active){L.style.display='none';return}
+ const v=active.mesh.position.clone().project(camera),b=$('pcard').getBoundingClientRect();
+ L.setAttribute('x1',(v.x*.5+.5)*innerWidth);L.setAttribute('y1',(v.y*-.5+.5)*innerHeight);
+ L.setAttribute('x2',b.left+b.width/2);L.setAttribute('y2',b.top+b.height/2);L.style.display='block';
+}
+function onClick(e){
+ if(!started||(e.target.closest&&e.target.closest('.mo,.hud')))return;
+ mouse.set(e.clientX/innerWidth*2-1,-(e.clientY/innerHeight)*2+1);ray.setFromCamera(mouse,camera);
+ const h=ray.intersectObjects(pick);
+ if(!h.length)return;
+ const r=h[0].object.userData.ref;
+ if(r==='sun')return showSun();
+ if(r==='bh')return showBH();
+ showP(r);
+}
+function fillStats(arr){
+ $('pstat').innerHTML=arr.map(s=>`<div class="st${s[2]?' wide':''}"><b>${s[0]}</b><span>${s[1]}</span></div>`).join('');
+ $('pstatBox').style.display='block';
+}
+function resetCard(){
+ $('pcard').classList.remove('sunmode');$('pbenBox').style.display='none';$('pstatBox').style.display='none';
+ $('ph4').innerText="✨ نبذة علمية";$('pbenT').innerText="🔭 حقائق مدهشة";
+ $('flyBtn').style.display='block';$('flyBtn').innerText="🚀 سافر إلى الكوكب";
+}
+function showP(p){
+ resetCard();
+ active=p;setPV(p);$('pt').innerText=p.name;$('pw').innerText=(base*p.g).toFixed(1);
+ $('pmath').innerText=`الوزن على ${p.name} = وزنك على الأرض (${base}) × معامل الجاذبية (${p.g}).`;
+ fillStats(p.stats);
+ $('pinfo').innerText=p.info;
+ $('pben').innerHTML=p.facts.map(t=>`<li>${t}</li>`).join('');$('pbenBox').style.display='block';
+ $('pcard').scrollTop=0;$('pm').classList.add('active');
+}
+function showSun(){
+ resetCard();$('flyBtn').innerText="🚀 سافر إلى الشمس";
+ active={mesh:sun};setPV('sun');$('pcard').classList.add('sunmode');
+ $('pt').innerText="الشمس ☀️";$('pw').innerText=(base*SUN_G).toFixed(0);
+ $('pmath').innerText=`جاذبية سطح الشمس ≈ ${SUN_G} ضعف جاذبية الأرض، فالوزن = ${base} × ${SUN_G}. (حسبة نظرية فقط، فلا يمكن الوقوف عليها لأنها كرة غازية شديدة الحرارة).`;
+ fillStats(SUN_STATS);
+ $('ph4').innerText="🌡️ درجة الحرارة";
+ $('pinfo').innerText="سطحها حوالي 5,500°C، ولبّها حوالي 15 مليون°C حيث تحدث الاندماجات النووية التي تنتج الطاقة. والمفاجئ أن هالتها الخارجية (الإكليل) أسخن من سطحها وتتجاوز المليون°C. وهي نجم متوسط الحجم، وتتسع لأكثر من مليون كرة أرضية.";
+ $('pbenT').innerText="🌱 فوائد الشمس";
+ $('pben').innerHTML=SUN_BEN.map(t=>`<li>${t}</li>`).join('');$('pbenBox').style.display='block';
+ $('pcard').scrollTop=0;$('pm').classList.add('active');
+}
+function showBH(){
+ resetCard();$('flyBtn').innerText="🚀 سافر إلى الثقب الأسود";
+ active={mesh:bh};setPV('bh');$('pt').innerText="الثقب الأسود ⚫";$('pw').innerText="∞";
+ $('pmath').innerText="جاذبيته قوية لدرجة أن حتى الضوء لا يستطيع الهروب منه، فلا يوجد وزن يمكن قياسه، والحسبة تؤول إلى اللانهاية.";
+ $('pinfo').innerText="ينشأ الثقب الأسود غالباً من انهيار نجم ضخم، وحدّه الذي لا عودة بعده يسمى أفق الحدث. والحلقة المتوهجة حوله غاز يسخن بشدة وهو يدور قبل أن يسقط فيه.";
+ $('pm').classList.add('active');
+}
+function closeP(){active=null;$('pm').classList.remove('active')}
+
+function setG(g){gender=g;$('gM').classList.toggle('on',g==='m');$('gF').classList.toggle('on',g==='f')}
+function launch(){
+ const w=parseFloat($('wIn').value);
+ if(!w||w<=0){alert("الرجاء إدخال وزن صحيح على الأرض!");return}
+ if(!gender){alert("اختر: ذكر أم أنثى؟");return}
+ base=w;uname=$('nameIn').value.trim()||(gender==='f'?"أيتها المستكشفة":"أيها المستكشف");
+ $('rocket').classList.add('go');
+ setTimeout(()=>{$('launch').classList.add('hidden');showVerses()},1500);
+}
+function showVerses(){
+ $('hello').innerText=gender==='f'?`مرحباً بكِ يا ${uname} ✨ تأمّلي قبل أن تبدئي رحلتكِ`:`مرحباً بك يا ${uname} ✨ تأمّل قبل أن تبدأ رحلتك`;
+ $('dots').innerHTML=VERSES.map(()=>'<i></i>').join('');
+ vi=0;$('verses').classList.add('show');setV();
+ vtimer=setInterval(()=>{vi=(vi+1)%VERSES.length;setV()},5500);
+}
+function setV(){
+ const t=$('vt');t.style.opacity=0;
+ setTimeout(()=>{t.innerText="﴿ "+VERSES[vi][0]+" ﴾";$('vs').innerText=VERSES[vi][1];t.style.opacity=1;
+  [...$('dots').children].forEach((d,i)=>d.classList.toggle('on',i===vi))},400);
+}
+function enterSpace(){
+ clearInterval(vtimer);$('verses').classList.remove('show');started=true;
+ $('sub').innerText=`أهلاً ${uname} 🌟 | وزنك: ${base} كجم | انقر على أي كوكب أو على الشمس`;
+ $('hw').innerText=`وزنك على الأرض: ${base} كجم`;$('hud').classList.add('visible');
+ $('sunv').classList.add('visible');$('bhl').classList.add('visible');
+ planets.forEach(p=>{p.label.innerHTML=`${p.name}<strong>${(base*p.g).toFixed(1)} كجم</strong>`;p.label.classList.add('visible')});
+}
+function resetJ(){
+ stopFly();
+ started=false;closeP();$('hud').classList.remove('visible');
+ $('sunv').classList.remove('visible');$('bhl').classList.remove('visible');
+ planets.forEach(p=>p.label.classList.remove('visible'));
+ const r=$('rocket');r.classList.remove('go');r.style.transition='none';r.style.transform='';
+ setTimeout(()=>r.style.transition='',50);$('launch').classList.remove('hidden');
+}
+
+/* ===== السفر (جولة لا نهائية) + الهبوط على السطح بمسافة / Enter ===== */
+let fly=null,tourIdx=0,stopBtn=null,landBtn=null,TOUR=[],kvN=0,svT=null;
+const HOME=new THREE.Vector3(0,42,68);
+const UPV=new THREE.Vector3(0,1,0);
+function buildTour(){
+ if(TOUR.length)return;
+ TOUR=[...planets,
+  {name:'الشمس',key:'Sun',mesh:sun,sphere:sun,fr:26},
+  {name:'الثقب الأسود',key:'BH',mesh:bh,sphere:bhCore,fr:24}];
+}
+function wantRad(P){return P.fr||(P.sphere.geometry.parameters.radius*4+3)}
+function showKV(){
+ const k=KV[kvN%KV.length];kvN++;
+ const el=$('kv');el.classList.remove('on');
+ setTimeout(()=>{if(fly&&(fly.phase==='land'||fly.phase==='surf'))return;el.innerHTML=`﴿ ${k[0]} ﴾<small>${k[1]}</small>`;el.classList.add('on')},350);
+}
+function flashSv(html,ms){
+ const el=$('sv');el.innerHTML=html;el.classList.add('on');
+ clearTimeout(svT);if(ms)svT=setTimeout(()=>el.classList.remove('on'),ms);
+}
+function hideSv(){clearTimeout(svT);$('sv').classList.remove('on')}
+function setLandLabel(){
+ if(!landBtn)return;
+ const down=fly&&(fly.phase==='land'||fly.phase==='surf');
+ landBtn.innerText=down?'🛫 إقلاع (مسافة / Enter)':'🌍 هبوط على السطح (مسافة / Enter)';
+}
+function flyTo(){
+ if(!active)return;
+ buildTour();
+ const m=active.mesh,i=TOUR.findIndex(t=>t.mesh===m);
+ if(i<0)return;
+ closeP();tourIdx=i;
+ if(document.activeElement&&document.activeElement.blur)document.activeElement.blur();
+ $('fx').classList.add('on');
+ if(!stopBtn){
+  stopBtn=document.createElement('button');
+  stopBtn.className='hb';stopBtn.innerText='⏹ إيقاف الرحلة';
+  stopBtn.style.cssText='position:fixed;bottom:70px;left:50%;transform:translateX(-50%);z-index:60;padding:10px 20px;font-size:14px;background:rgba(255,46,99,.85);border-color:#ff2e63';
+  stopBtn.onclick=stopFly;document.body.appendChild(stopBtn);
+  landBtn=document.createElement('button');
+  landBtn.className='hb';
+  landBtn.style.cssText='position:fixed;bottom:118px;left:50%;transform:translateX(-50%);z-index:60;padding:10px 20px;font-size:14px;background:rgba(0,150,200,.85);border-color:#00e5ff;white-space:nowrap';
+  landBtn.onclick=toggleSurface;document.body.appendChild(landBtn);
+ }
+ stopBtn.style.display='block';landBtn.style.display='block';
+ fly={P:TOUR[i],t:0,phase:'go'};
+ setLandLabel();
+ showKV();
+}
+function stopFly(){
+ if(!fly)return;
+ fly.phase='back';$('fx').classList.remove('on');$('kv').classList.remove('on');hideSv();
+ if(stopBtn)stopBtn.style.display='none';
+ if(landBtn)landBtn.style.display='none';
+}
+function toggleSurface(){
+ if(!fly||fly.phase==='back')return;
+ const P=fly.P;
+ if(fly.phase==='land'||fly.phase==='surf'){ // إقلاع ومتابعة الجولة
+  fly.phase='go';fly.t=0;hideSv();setLandLabel();showKV();return;
+ }
+ if(P.mesh===bh){
+  flashSv('<b>🕳️ الثقب الأسود</b>لا سطح له: وراء أفق الحدث لا عودة، ولذلك نكتفي بالمدار!',3500);return;
+ }
+ fly.phase='land';fly.t=0;
+ fly.lk=P.mesh.position.clone();
+ fly.ang=Math.atan2(-P.mesh.position.z,-P.mesh.position.x); // نهبط على الجهة المضيئة
+ $('kv').classList.remove('on');
+ flashSv('<b>⬇️ جاري الهبوط...</b>');
+ setLandLabel();
+}
+function showSv(P){
+ const sun_=P.mesh===sun,key=sun_?'Sun':P.key;
+ const w=sun_?(base*SUN_G).toFixed(0):(base*P.g).toFixed(1);
+ const t=sun_?'فوق سطح الشمس ☀️':(GAS[key]?`فوق غيوم ${P.name} ☁️`:`على سطح ${P.name} 🌍`);
+ flashSv(`<b>${t}</b>${SURF[key]}<em>⚖️ وزنك هنا: ${w} كجم</em><small>مسافة / Enter للإقلاع ومتابعة الجولة</small>`,0);
+}
+function surfTarget(P,ang){
+ const R=P.sphere.geometry.parameters.radius,alt=R*.05+.1,lat=.25,cl=Math.cos(lat);
+ const up=new THREE.Vector3(Math.cos(ang)*cl,Math.sin(lat),Math.sin(ang)*cl);
+ const fwd=new THREE.Vector3(-Math.sin(ang),0,Math.cos(ang));
+ return {up,fwd,p:P.mesh.position.clone().add(up.clone().multiplyScalar(R+alt))};
+}
+function flyStep(){
+ if(!fly)return;
+ const P=fly.P,pos=P.mesh.position,ph=fly.phase;
+ if(ph!=='land'&&ph!=='surf')camera.up.lerp(UPV,.08).normalize();
+ if(ph==='go'){
+  const dir=pos.length()<1?new THREE.Vector3(0,.25,1).normalize():pos.clone().normalize();
+  const target=pos.clone().add(dir.multiplyScalar(wantRad(P))).add(new THREE.Vector3(0,2,0));
+  camera.position.lerp(target,.045);
+  camera.lookAt(pos);
+  fly.t++;
+  if(camera.position.distanceTo(target)<4||fly.t>500){
+   fly.phase='orbit';fly.t=0;
+   fly.ang=Math.atan2(camera.position.z-pos.z,camera.position.x-pos.x);
+   fly.rad=camera.position.distanceTo(pos);
+  }
+ }else if(ph==='orbit'){
+  fly.t++;fly.ang+=.012;
+  fly.rad+=(wantRad(P)-fly.rad)*.05;
+  camera.position.set(pos.x+Math.cos(fly.ang)*fly.rad,pos.y+2,pos.z+Math.sin(fly.ang)*fly.rad);
+  camera.lookAt(pos);
+  if(fly.t>260){ // الوجهة التالية، وهكذا بلا نهاية
+   tourIdx=(tourIdx+1)%TOUR.length;
+   fly.P=TOUR[tourIdx];fly.phase='go';fly.t=0;showKV();
+  }
+ }else if(ph==='land'||ph==='surf'){
+  if(ph==='land')fly.t++;else fly.ang+=.0012;
+  const S=surfTarget(P,fly.ang);
+  const dist=camera.position.distanceTo(S.p);
+  if(ph==='land'){
+   camera.position.lerp(S.p,.09);
+   if(dist<2.5||fly.t>220){fly.phase='surf';fly.b=0;showSv(P)}
+  }else{
+   fly.b=Math.min(1,fly.b+.04);
+   camera.position.lerp(S.p,.25+.75*fly.b);
+  }
+  const w=Math.min(1,dist/10);
+  camera.up.lerp(S.up,.15*(1-w)).normalize();
+  const hz=S.p.clone().add(S.fwd.clone().multiplyScalar(8)).sub(S.up.clone().multiplyScalar(.7));
+  fly.lk.lerp(hz.lerp(pos,w),.12);
+  camera.lookAt(fly.lk);
+ }else{
+  camera.position.lerp(HOME,.05);
+  camera.lookAt(0,0,0);
+  if(camera.position.distanceTo(HOME)<.5){camera.position.copy(HOME);camera.up.copy(UPV);camera.lookAt(0,0,0);fly=null}
+ }
+}
+addEventListener('keydown',e=>{
+ if(!fly)return;
+ if(e.code==='Space'||e.code==='Enter'||e.key==='Enter'){
+  e.preventDefault();
+  if(!e.repeat)toggleSurface();
+ }
+});
+addEventListener('keyup',e=>{if(fly&&e.code==='Space')e.preventDefault()});
+
+$('nameIn').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();$('wIn').focus()}});
+$('wIn').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();launch()}});
+onload=()=>setTimeout(init,60);
+</script></body></html>
